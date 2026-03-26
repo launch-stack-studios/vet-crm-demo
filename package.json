@@ -1,0 +1,9 @@
+{
+  "name": "vet-crm-demo",
+  "version": "1.0.0",
+  "description": "Minimal veterinary CRM demo app",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}
