@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <title>Vet Dashboard</title>
+</head>
+<body>
+<h1>Vet Dashboard</h1>
+<section>
+ <button id="loadPets">Load Pets</button>
+ <pre id="petsOut"></pre>
+</section>
+<section>
+ <button id="loadAppts">Load Appointments</button>
+ <pre id="apptsOut"></pre>
+</section>
+<section>
+ <h2>Add Pet</h2>
+ <input id="petName" placeholder="Name">
+ <input id="petSpecies" placeholder="Species">
+ <button id="addPetBtn">Add Pet</button>
+ <pre id="addPetOut"></pre>
+</section>
+<script>
+document.getElementById('loadPets').onclick = function() {
+ fetch('/pets').then(function(res) { return res.json(); }).then(function(data) {
+   document.getElementById('petsOut').textContent = JSON.stringify(data, null, 2);
+ }).catch(function(err) {
+   document.getElementById('petsOut').textContent = err.toString();
+ });
+};
+document.getElementById('loadAppts').onclick = function() {
+ fetch('/appointments').then(function(res) { return res.json(); }).then(function(data) {
+   document.getElementById('apptsOut').textContent = JSON.stringify(data, null, 2);
+ }).catch(function(err) {
+   document.getElementById('apptsOut').textContent = err.toString();
+ });
+};
+document.getElementById('addPetBtn').onclick = function() {
+ const name = document.getElementById('petName').value;
+ const species = document.getElementById('petSpecies').value;
+ fetch('/pets', {
+   method: 'POST',
+   headers: { 'Content-Type': 'application/json' },
+   body: JSON.stringify({ name: name, species: species })
+ }).then(function(res) { return res.json(); }).then(function(data) {
+   document.getElementById('addPetOut').textContent = JSON.stringify(data, null, 2);
+ }).catch(function(err) {
+   document.getElementById('addPetOut').textContent = err.toString();
+ });
+};
+</script>
+</body>
+</html>
