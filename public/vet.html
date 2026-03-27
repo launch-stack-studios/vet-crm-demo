@@ -1,54 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8">
- <title>Vet Dashboard</title>
+  <meta charset="UTF-8">
+  <title>Vet Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #444; }
+    section { margin-bottom: 30px; }
+    button { margin-top: 5px; }
+    pre { background: #f4f4f4; padding: 10px; border-radius: 4px; }
+    label { display: block; margin-top: 5px; }
+  </style>
 </head>
 <body>
-<h1>Vet Dashboard</h1>
-<section>
- <button id="loadPets">Load Pets</button>
- <pre id="petsOut"></pre>
-</section>
-<section>
- <button id="loadAppts">Load Appointments</button>
- <pre id="apptsOut"></pre>
-</section>
-<section>
- <h2>Add Pet</h2>
- <input id="petName" placeholder="Name">
- <input id="petSpecies" placeholder="Species">
- <button id="addPetBtn">Add Pet</button>
- <pre id="addPetOut"></pre>
-</section>
-<script>
-document.getElementById('loadPets').onclick = function() {
- fetch('/pets').then(function(res) { return res.json(); }).then(function(data) {
-   document.getElementById('petsOut').textContent = JSON.stringify(data, null, 2);
- }).catch(function(err) {
-   document.getElementById('petsOut').textContent = err.toString();
- });
-};
-document.getElementById('loadAppts').onclick = function() {
- fetch('/appointments').then(function(res) { return res.json(); }).then(function(data) {
-   document.getElementById('apptsOut').textContent = JSON.stringify(data, null, 2);
- }).catch(function(err) {
-   document.getElementById('apptsOut').textContent = err.toString();
- });
-};
-document.getElementById('addPetBtn').onclick = function() {
- const name = document.getElementById('petName').value;
- const species = document.getElementById('petSpecies').value;
- fetch('/pets', {
-   method: 'POST',
-   headers: { 'Content-Type': 'application/json' },
-   body: JSON.stringify({ name: name, species: species })
- }).then(function(res) { return res.json(); }).then(function(data) {
-   document.getElementById('addPetOut').textContent = JSON.stringify(data, null, 2);
- }).catch(function(err) {
-   document.getElementById('addPetOut').textContent = err.toString();
- });
-};
-</script>
+  <h1>Vet Dashboard</h1>
+  <section>
+    <h2>All Pets</h2>
+    <button id="loadPetsBtn">Load Pets</button>
+    <pre id="petsOutput"></pre>
+  </section>
+  <section>
+    <h2>All Appointments</h2>
+    <button id="loadApptsBtn">Load Appointments</button>
+    <pre id="apptsOutput"></pre>
+  </section>
+  <section>
+    <h2>Add New Owner</h2>
+    <label for="ownerName">Name:</label>
+    <input type="text" id="ownerName">
+    <label for="ownerEmail">Email:</label>
+    <input type="email" id="ownerEmail">
+    <label for="ownerPhone">Phone:</label>
+    <input type="text" id="ownerPhone">
+    <button id="createOwnerBtn">Add Owner</button>
+    <pre id="ownerOutput"></pre>
+  </section>
+
+  <section>
+    <h2>Add New Pet</h2>
+    <label for="newPetName">Name:</label>
+    <input type="text" id="newPetName">
+    <label for="newPetSpecies">Species:</label>
+    <input type="text" id="newPetSpecies">
+    <label for="newPetBreed">Breed:</label>
+    <input type="text" id="newPetBreed">
+    <label for="newPetOwners">Owner IDs (comma separated):</label>
+    <input type="text" id="newPetOwners" placeholder="e.g. 1,2">
+    <button id="createPetBtn">Add Pet</button>
+    <pre id="createPetOutput"></pre>
+  </section>
+
+  <section>
+    <h2>Add Vaccination</h2>
+    <label for="vetVacPetId">Pet ID:</label>
+    <input type="number" id="vetVacPetId">
+    <label for="vetVacType">Vaccine Type:</label>
+    <input type="text" id="vetVacType">
+    <label for="vetVacDate">Date:</label>
+    <input type="date" id="vetVacDate">
+    <label for="vetVacDue">Due Date:</label>
+    <input type="date" id="vetVacDue">
+    <button id="vetCreateVacBtn">Add Vaccination</button>
+    <pre id="vetVacOutput"></pre>
+  </section>
+
+  <section>
+    <h2>Add Medication</h2>
+    <label for="vetMedPetId">Pet ID:</label>
+    <input type="number" id="vetMedPetId">
+    <label for="vetMedName">Medication Name:</label>
+    <input type="text" id="vetMedName">
+    <label for="vetMedDosage">Dosage:</label>
+    <input type="text" id="vetMedDosage">
+    <label for="vetMedStart">Start Date:</label>
+    <input type="date" id="vetMedStart">
+    <label for="vetMedEnd">End Date:</label>
+    <input type="date" id="vetMedEnd">
+    <button id="vetCreateMedBtn">Add Medication</button>
+    <pre id="vetMedOutput"></pre>
+  </section>
+
+  <section>
+    <h2>Schedule Appointment</h2>
+    <label for="vetApptPetId">Pet ID:</label>
+    <input type="number" id="vetApptPetId">
+    <label for="vetApptDate">Date:</label>
+    <input type="date" id="vetApptDate">
+    <label for="vetApptReason">Reason:</label>
+    <input type="text" id="vetApptReason" placeholder="e.g. Checkup">
+    <button id="vetCreateApptBtn">Schedule</button>
+    <pre id="vetApptOutput"></pre>
+  </section>
+  <script>
+    // Load all pets
+    document.getElementById('loadPetsBtn').onclick = function() {
+      fetch('/pets').then(function(res) { return res.json(); }).then(function(data) {
+        document.getElementById('petsOutput').textContent = JSON.stringify(data, null, 2);
+      }).catch(function(err) {
+        document.getElementById('petsOutput').textContent = err.toString();
+      });
+    };
+    // Load all appointments
+    document.getElementById('loadApptsBtn').onclick = function() {
+      fetch('/appointments').then(function(res) { return res.json(); }).then(function(data) {
+        document.getElementById('apptsOutput').textContent = JSON.stringify(data, null, 2);
+      }).catch(function(err) {
+        document.getElementById('apptsOutput').textContent = err.toString();
+      });
+    };
+    // Create a new owner
+    document.getElementById('createOwnerBtn').onclick = function() {
+      var name = document.getElementById('ownerName').value;
+      var email = document.getElementById('ownerEmail').value;
+      var phone = document.getElementById('ownerPhone').value;
+      fetch('/owners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, email: email, phone: phone })
+      }).then(function(res) {
+        return res.json().then(function(data) {
+          if (!res.ok) throw data;
+          return data;
+        });
+      }).then(function(data) {
+        document.getElementById('ownerOutput').textContent = 'Owner created: ' + JSON.stringify(data, null, 2);
+      }).catch(function(err) {
+        document.getElementById('ownerOutput').textContent = JSON.stringify(err);
+      });
+    };
+
+    // Create a new pet
+    document.getElementById('createPetBtn').onclick = function() {
+      var name = document.getElementById('newPetName').value;
+      var species = document.getElementById('newPetSpecies').value;
+      var breed = document.getElementById('newPetBreed').value;
+      var ownerIds = document.getElementById('newPetOwners').value;
+      fetch('/pets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, species: species, breed: breed, ownerIds: ownerIds })
+      }).then(function(res) {
+        return res.json().then(function(data) {
+          if (!res.ok) throw data;
+          return data;
+        });
+      }).then(function(data) {
+        document.getElementById('createPetOutput').textContent = 'Pet created: ' + JSON.stringify(data, null, 2);
+      }).catch(function(err) {
+        document.getElementById('createPetOutput').textContent = JSON.stringify(err);
+      });
+    };
+
+    // Add vaccination
+    document.getElementById('vetCreateVacBtn').onclick = function() {
+      var petId = document.getElementById('vetVacPetId').value;
+      var type = document.getElementById('vetVacType').value;
+      var date = document.getElementById('vetVacDate').value;
+      var due = document.getElementById('vetVacDue').value;
+      fetch('/pets/' + petId + '/vaccinations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: type, date: date, dueDate: due })
+      }).then(function(res) {
+        return res.json().then(function(data) {
+          if (!res.ok) throw data;
+          return data;
+        });
+      }).then(function(data) {
+        document.getElementById('vetVacOutput').textContent = 'Vaccination added: ' + JSON.stringify(data, null, 2);
+      }).catch(function(err) {
+        document.getElementById('vetVacOutput').textContent = JSON.stringify(err);
+      });
+    };
+
+    // Add medication
+    document.getElementById('vetCreateMedBtn').onclick = function() {
+      var petId = document.getElementById('vetMedPetId').value;
+      var name = document.getElementById('vetMedName').value;
+      var dosage = document.getElementById('vetMedDosage').value;
+      var start = document.getElementById('vetMedStart').value;
+      var end = document.getElementById('vetMedEnd').value;
+      fetch('/pets/' + petId + '/medications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, dosage: dosage, startDate: start, endDate: end })
+      }).then(function(res) {
+        return res.json().then(function(data) {
+          if (!res.ok) throw data;
+          return data;
+        });
+      }).then(function(data) {
+        document.getElementById('vetMedOutput').textContent = 'Medication added: ' + JSON.stringify(data, null, 2);
+      }).catch(function(err) {
+        document.getElementById('vetMedOutput').textContent = JSON.stringify(err);
+      });
+    };
+
+    // Schedule appointment
+    document.getElementById('vetCreateApptBtn').onclick = function() {
+      var petId = document.getElementById('vetApptPetId').value;
+      var date = document.getElementById('vetApptDate').value;
+      var reason = document.getElementById('vetApptReason').value;
+      fetch('/appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ petId: petId, scheduledDate: date, reason: reason })
+      }).then(function(res) {
+        return res.json().then(function(data) {
+          if (!res.ok) throw data;
+          return data;
+        });
+      }).then(function(data) {
+        document.getElementById('vetApptOutput').textContent = 'Appointment created: ' + JSON.stringify(data, null, 2);
+      }).catch(function(err) {
+        document.getElementById('vetApptOutput').textContent = JSON.stringify(err);
+      });
+    };
+  </script>
 </body>
 </html>

@@ -3,21 +3,157 @@
 <head>
   <meta charset="UTF-8">
   <title>Pet Owner App</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #444; }
+    section { margin-bottom: 30px; }
+    button { margin-top: 5px; }
+    pre { background: #f4f4f4; padding: 10px; border-radius: 4px; }
+    label { display: block; margin-top: 5px; }
+  </style>
 </head>
 <body>
   <h1>Pet Owner App</h1>
-  <button id="loadPetsBtn">Load Pets</button>
-  <pre id="petsOutput">Click the button to load pets</pre>
+  <section>
+    <h2>All Pets</h2>
+    <button id="loadPetsBtn">Load Pets</button>
+    <pre id="petsOutput">Click "Load Pets" to see your pets.</pre>
+  </section>
+  <section>
+    <h2>Find Pet</h2>
+    <label for="petIdInput">Pet ID:</label>
+    <input type="number" id="petIdInput">
+    <button id="findPetBtn">Find</button>
+    <pre id="petOutput"></pre>
+  </section>
+  <section>
+    <h2>Schedule Appointment</h2>
+    <label for="apptPetId">Pet ID:</label>
+    <input type="number" id="apptPetId">
+    <label for="apptDate">Date:</label>
+    <input type="date" id="apptDate">
+    <label for="apptReason">Reason:</label>
+    <input type="text" id="apptReason" placeholder="e.g. Annual exam">
+    <button id="createApptBtn">Create Appointment</button>
+    <pre id="apptOutput"></pre>
+  </section>
+
+  <section>
+    <h2>Add Vaccination</h2>
+    <label for="vacPetId">Pet ID:</label>
+    <input type="number" id="vacPetId">
+    <label for="vacType">Vaccine Type:</label>
+    <input type="text" id="vacType">
+    <label for="vacDate">Date:</label>
+    <input type="date" id="vacDate">
+    <label for="vacDue">Due Date:</label>
+    <input type="date" id="vacDue">
+    <button id="createVacBtn">Add Vaccination</button>
+    <pre id="vacOutput"></pre>
+  </section>
+
+  <section>
+    <h2>Add Medication</h2>
+    <label for="medPetId">Pet ID:</label>
+    <input type="number" id="medPetId">
+    <label for="medName">Medication Name:</label>
+    <input type="text" id="medName">
+    <label for="medDosage">Dosage:</label>
+    <input type="text" id="medDosage">
+    <label for="medStart">Start Date:</label>
+    <input type="date" id="medStart">
+    <label for="medEnd">End Date:</label>
+    <input type="date" id="medEnd">
+    <button id="createMedBtn">Add Medication</button>
+    <pre id="medOutput"></pre>
+  </section>
   <script>
-    document.getElementById('loadPetsBtn').onclick = function () {
-      fetch('/pets')
-        .then(function (res) { return res.json(); })
-        .then(function (data) {
-          document.getElementById('petsOutput').textContent = JSON.stringify(data, null, 2);
-        })
-        .catch(function (err) {
-          document.getElementById('petsOutput').textContent = err.toString();
+    // Load all pets
+    document.getElementById('loadPetsBtn').onclick = function() {
+      fetch('/pets').then(function(res) { return res.json(); }).then(function(data) {
+        document.getElementById('petsOutput').textContent = JSON.stringify(data, null, 2);
+      }).catch(function(err) {
+        document.getElementById('petsOutput').textContent = err.toString();
+      });
+    };
+    // Find a pet by ID
+    document.getElementById('findPetBtn').onclick = function() {
+      var id = document.getElementById('petIdInput').value;
+      fetch('/pets/' + id).then(function(res) {
+        return res.json().then(function(data) {
+          if (!res.ok) throw data;
+          return data;
         });
+      }).then(function(data) {
+        document.getElementById('petOutput').textContent = JSON.stringify(data, null, 2);
+      }).catch(function(err) {
+        document.getElementById('petOutput').textContent = JSON.stringify(err);
+      });
+    };
+    // Create an appointment
+    document.getElementById('createApptBtn').onclick = function() {
+      var petId = document.getElementById('apptPetId').value;
+      var date = document.getElementById('apptDate').value;
+      var reason = document.getElementById('apptReason').value;
+      fetch('/appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ petId: petId, scheduledDate: date, reason: reason })
+      }).then(function(res) {
+        return res.json().then(function(data) {
+          if (!res.ok) throw data;
+          return data;
+        });
+      }).then(function(data) {
+        document.getElementById('apptOutput').textContent = 'Appointment created: ' + JSON.stringify(data, null, 2);
+      }).catch(function(err) {
+        document.getElementById('apptOutput').textContent = JSON.stringify(err);
+      });
+    };
+
+    // Add a vaccination
+    document.getElementById('createVacBtn').onclick = function() {
+      var petId = document.getElementById('vacPetId').value;
+      var type = document.getElementById('vacType').value;
+      var date = document.getElementById('vacDate').value;
+      var due = document.getElementById('vacDue').value;
+      fetch('/pets/' + petId + '/vaccinations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: type, date: date, dueDate: due })
+      }).then(function(res) {
+        return res.json().then(function(data) {
+          if (!res.ok) throw data;
+          return data;
+        });
+      }).then(function(data) {
+        document.getElementById('vacOutput').textContent = 'Vaccination added: ' + JSON.stringify(data, null, 2);
+      }).catch(function(err) {
+        document.getElementById('vacOutput').textContent = JSON.stringify(err);
+      });
+    };
+
+    // Add a medication
+    document.getElementById('createMedBtn').onclick = function() {
+      var petId = document.getElementById('medPetId').value;
+      var name = document.getElementById('medName').value;
+      var dosage = document.getElementById('medDosage').value;
+      var start = document.getElementById('medStart').value;
+      var end = document.getElementById('medEnd').value;
+      fetch('/pets/' + petId + '/medications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, dosage: dosage, startDate: start, endDate: end })
+      }).then(function(res) {
+        return res.json().then(function(data) {
+          if (!res.ok) throw data;
+          return data;
+        });
+      }).then(function(data) {
+        document.getElementById('medOutput').textContent = 'Medication added: ' + JSON.stringify(data, null, 2);
+      }).catch(function(err) {
+        document.getElementById('medOutput').textContent = JSON.stringify(err);
+      });
     };
   </script>
 </body>
